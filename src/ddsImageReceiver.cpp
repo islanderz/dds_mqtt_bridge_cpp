@@ -15,12 +15,15 @@ using namespace rti;
 // TODO: consider threading model once more, mutexes, etc.
 // TODO: message number
 // TODO: fix sleep
+// TODO: add rti_dds Makefile to CMakeLists.txt
 
 class RosReceiver : public IDataSink {
 private:
     int rosRate;
     ros::NodeHandle nodeHandle;
     image_transport::Publisher imagePub;
+    timeval last_img_time;
+    int frame_num;
 
 public:
     RosReceiver();
@@ -32,7 +35,8 @@ public:
 
 RosReceiver::RosReceiver() :
     rosRate(30),
-    nodeHandle() {
+    nodeHandle(),
+    frame_num(0) {
     image_transport::ImageTransport img_trans(nodeHandle);    
     imagePub = img_trans.advertise("/ardrone/image_raw", 1);
 }
@@ -42,6 +46,18 @@ RosReceiver::~RosReceiver() {
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
+    if (frame_num == 0)
+        gettimeofday(&last_img_time, NULL);
+    frame_num++;
+    if (frame_num == 30) {
+        frame_num = 0;
+        timeval img_time;
+        gettimeofday(&img_time, NULL);        
+        double tt = GET_TDIFF(last_img_time, img_time);
+        tt = tt / 30;
+        cerr << "Avg. frame time: " << tt << endl;
+    }
+    
     // assumption is that message is already assembled
     sensor_msgs::Image image_msg;
     ros::serialization::IStream istream((uint8_t*)buffer, len);
