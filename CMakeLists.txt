@@ -149,7 +149,11 @@ add_executable(ddsNavdataReceiver src/ddsNavdataReceiver.cpp)
 add_dependencies(ddsNavdataReceiver ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ddsNavdataReceiver ${catkin_LIBRARIES} ${RTI_LIBS})
 
-install(TARGETS ddsSender RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+add_executable(ddsImageReceiver src/ddsImageReceiver.cpp)
+add_dependencies(ddsImageReceiver ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ddsImageReceiver ${catkin_LIBRARIES} ${RTI_LIBS})
+
+install(TARGETS ddsSender ddsNavdataReceiver ddsImageReceiver RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
 install(DIRECTORY launch/

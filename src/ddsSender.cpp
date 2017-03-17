@@ -77,10 +77,9 @@ void RosSender::imageMessageCallback(
         printf("too large image");
         exit(1);
     }
-        
     ros::serialization::OStream ostream((uint8_t*)buff, serial_size);
     ros::serialization::serialize(ostream, *msg);
-    navDataSender->sink(buff, (int)serial_size,
+    imageSender->sink(buff, (int)serial_size,
         AUTO_MSG_ID, true);
 }
 
