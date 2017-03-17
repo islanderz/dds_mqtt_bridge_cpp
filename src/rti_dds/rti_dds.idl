@@ -5,3 +5,10 @@ struct Buffer1024 {
     boolean                  is_last;
 };
 
+struct Buffer1024k {
+    sequence<octet, 1048576>    payload;
+    long                        length;
+    long                        msg_id;
+    boolean                     is_last;
+};
+

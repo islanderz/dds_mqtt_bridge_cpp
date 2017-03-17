@@ -20,7 +20,7 @@ using namespace std;
 
 namespace rti {
 
-    // TODO: abstract away from Buffer1024 with help of templates
+    // TODO: abstract away from Buffer1024k with help of templates
     // TODO: SSTR could be made better by including file + line number
     //       for errors
 
@@ -52,8 +52,8 @@ namespace rti {
     private:
         DDSPublisher *publisher;
         DDSDataWriter *writer;
-        Buffer1024DataWriter * Buffer1024_writer;
-        Buffer1024 *instance;
+        Buffer1024kDataWriter * Buffer1024k_writer;
+        Buffer1024k *instance;
         int curr_msgId;
     public:
         DdsDataSender(int domainId, string topic);
@@ -65,11 +65,11 @@ namespace rti {
             bool isLast);
     };
 
-    class Buffer1024Listener : public DDSDataReaderListener {
+    class Buffer1024kListener : public DDSDataReaderListener {
     private:
         IDataSink* sink;
     public:
-        Buffer1024Listener(IDataSink* sink);
+        Buffer1024kListener(IDataSink* sink);
         virtual void on_requested_deadline_missed(
             DDSDataReader* /*reader*/,
             const DDS_RequestedDeadlineMissedStatus& /*status*/) {}
@@ -102,7 +102,7 @@ namespace rti {
     private:
         IDataSink* receiver;
         DDSSubscriber *subscriber;
-        Buffer1024Listener *reader_listener; 
+        Buffer1024kListener *reader_listener; 
         DDSDataReader *reader;
 
         // idea is that connection attempts to buffer incoming

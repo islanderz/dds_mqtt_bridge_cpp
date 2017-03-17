@@ -11,7 +11,7 @@ using namespace rti;
 // TODO:     nodeHandle.getParam("/ddsNavDataDomain", navDataDomain);
 // TODO: errors may arise
 // TODO: add last image sent stats
-// TODO: optimize buffer operations
+// TODO: optimize buffer operations (!!!)
 // TODO: consider threading model once more, mutexes, etc.
 // TODO: message number
 
@@ -22,16 +22,17 @@ private:
     ros::Publisher navdataPub;
 
 public:
-    RosReceiver() :
-        rosRate(30),
-        nodeHandle();
+    RosReceiver();
     virtual ~RosReceiver();
 
 public:
-    virtual int sink(char* buffer, int len, bool isLast);
+    virtual void sink(char* buffer, int len, int msgId, bool isLast);
 };
 
-RosReceiver::RosReceiver() {
+RosReceiver::RosReceiver() :
+    rosRate(30),
+    nodeHandle() {
+    
     navdataPub = nodeHandle.advertise<ardrone_autonomy::Navdata>
         ("/tum_ardrone/navdata", 1);
 }
@@ -39,12 +40,13 @@ RosReceiver::RosReceiver() {
 RosReceiver::~RosReceiver() {
 }
 
-int RosReceiver::sink(char* buffer, int len, int msgId,
+void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
+    
     // assumption is that message is already assembled
     ardrone_autonomy::Navdata navMsg;
     boost::shared_array<uint8_t> ibuffer(new uint8_t[len]);
-    ros::serialization::IStream istream(buffer, len);
+    ros::serialization::IStream istream((uint8_t*)buffer, len);
     ros::serialization::deserialize(istream, navMsg);
     navdataPub.publish(navMsg);
 }
@@ -52,8 +54,8 @@ int RosReceiver::sink(char* buffer, int len, int msgId,
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ddsNavdataReceiver");
 
-    RosReceiver rr();
-    DdsConnection conn(&rr);
-    return conn.loop();
+    RosReceiver rr;
+    DdsConnection conn(&rr, 200, "ros-navdata", 1024*1024);
+    return conn.loop(-1);
 }
 

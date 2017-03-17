@@ -83,5 +83,9 @@ objs/$(TARGET_ARCH)/%.o : %.cxx  rti_dds.h
 		mkdir -p $* ; \
 	fi;
 
-.PHONY: all
+clean:
+	rm objs -rf
+	rm librti_dds.a -f
+
+.PHONY: all clean
 

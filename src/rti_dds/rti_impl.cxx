@@ -19,9 +19,9 @@ namespace rti {
     // //     printf("finalize_instance error %d\n", retcode);
     // //     status = -1;
     // // }
-    // TODO: move Buffer1024listener inside DdsConnection
+    // TODO: move Buffer1024klistener inside DdsConnection
     // TODO: should somehow sync ddsconnection loop thread with
-    //       dds callback (for Buffer1024Listener) thread, so that
+    //       dds callback (for Buffer1024kListener) thread, so that
     //       exceptional situations are handled; maybe loop thread
     //       could call sink() as well, to have things simplier
     // TODO: hide sink() in DdsConnection
@@ -86,8 +86,8 @@ namespace rti {
         if (publisher == NULL)
             crashdown("create_publisher error");
 
-        type_name = Buffer1024TypeSupport::get_type_name();
-        retcode = Buffer1024TypeSupport::register_type(
+        type_name = Buffer1024kTypeSupport::get_type_name();
+        retcode = Buffer1024kTypeSupport::register_type(
             participant, type_name);
         if (retcode != DDS_RETCODE_OK)
             crashdown(SSTR("register_type error " << retcode));
@@ -104,13 +104,13 @@ namespace rti {
         if (writer == NULL)
             crashdown("create_datawriter error");
 
-        Buffer1024_writer = Buffer1024DataWriter::narrow(writer);
-        if (Buffer1024_writer == NULL)
+        Buffer1024k_writer = Buffer1024kDataWriter::narrow(writer);
+        if (Buffer1024k_writer == NULL)
             crashdown("DataWriter narrow error");
 
-        instance = Buffer1024TypeSupport::create_data();
+        instance = Buffer1024kTypeSupport::create_data();
         if (instance == NULL)
-            crashdown("Buffer1024TypeSupport::create_data error");
+            crashdown("Buffer1024kTypeSupport::create_data error");
         instance->payload.maximum(0);
     }
     DdsDataSender::~DdsDataSender() {
@@ -133,33 +133,33 @@ namespace rti {
         instance->length = len;
         instance->msg_id = curr_msgId++;
         instance->is_last = isLast;
-        retcode = Buffer1024_writer->write(*instance,
+        retcode = Buffer1024k_writer->write(*instance,
             DDS_HANDLE_NIL);
         instance->payload.unloan();
         if (retcode != DDS_RETCODE_OK)
             throw RtiException(SSTR("write error error" << retcode));
     }
 
-    Buffer1024Listener::Buffer1024Listener(IDataSink* sink) :
+    Buffer1024kListener::Buffer1024kListener(IDataSink* sink) :
         sink(sink) {
     }
     
-    void Buffer1024Listener::on_data_available(
+    void Buffer1024kListener::on_data_available(
         DDSDataReader* reader) {
         
-        Buffer1024DataReader *Buffer1024_reader = NULL;
-        Buffer1024Seq data_seq;
+        Buffer1024kDataReader *Buffer1024k_reader = NULL;
+        Buffer1024kSeq data_seq;
         DDS_SampleInfoSeq info_seq;
         DDS_ReturnCode_t retcode;
         int i;
 
-        Buffer1024_reader = Buffer1024DataReader::narrow(reader);
-        if (Buffer1024_reader == NULL) {
+        Buffer1024k_reader = Buffer1024kDataReader::narrow(reader);
+        if (Buffer1024k_reader == NULL) {
             printf("DataReader narrow error\n");
             return;
         }
 
-        retcode = Buffer1024_reader->take(
+        retcode = Buffer1024k_reader->take(
             data_seq, info_seq, DDS_LENGTH_UNLIMITED,
             DDS_ANY_SAMPLE_STATE, DDS_ANY_VIEW_STATE,
             DDS_ANY_INSTANCE_STATE);
@@ -173,13 +173,13 @@ namespace rti {
 
         for (i = 0; i < data_seq.length(); ++i) {
             if (info_seq[i].valid_data) {
-                Buffer1024* b = &data_seq[i];
+                Buffer1024k* b = &data_seq[i];
                 sink->sink((char*)b->payload.get_contiguous_buffer(),
                     b->length, b->msg_id, b->is_last);
             }
         }
 
-        retcode = Buffer1024_reader->return_loan(data_seq, info_seq);
+        retcode = Buffer1024k_reader->return_loan(data_seq, info_seq);
         if (retcode != DDS_RETCODE_OK) {
             printf("return loan error %d\n", retcode);
         }
@@ -207,8 +207,8 @@ namespace rti {
         if (subscriber == NULL)
             crashdown("create_participant error");
 
-        type_name = Buffer1024TypeSupport::get_type_name();
-        retcode = Buffer1024TypeSupport::register_type(
+        type_name = Buffer1024kTypeSupport::get_type_name();
+        retcode = Buffer1024kTypeSupport::register_type(
             participant, type_name);
         if (retcode != DDS_RETCODE_OK)
             crashdown(SSTR("register_type error " << retcode));
@@ -219,7 +219,7 @@ namespace rti {
         if (topic == NULL)
             crashdown("create_topic error");
         
-        reader_listener = new Buffer1024Listener(this);
+        reader_listener = new Buffer1024kListener(this);
         reader = subscriber->create_datareader(
             topic, DDS_DATAREADER_QOS_DEFAULT, reader_listener,
             DDS_STATUS_MASK_ALL);
@@ -233,8 +233,12 @@ namespace rti {
         }
     }
     int DdsConnection::loop(int wait_time) {
-        DDS_Duration_t receive_period = {wait_time, 0};
-        NDDSUtility::sleep(receive_period);
+        if (wait_time < 0) {
+            pause();
+        } else {
+            DDS_Duration_t receive_period = {wait_time, 0};
+            NDDSUtility::sleep(receive_period);
+        }
         return 0;
     }
 

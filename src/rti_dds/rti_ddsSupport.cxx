@@ -115,3 +115,103 @@ Defines:   TTypeSupport, TData, TDataReader, TDataWriter
 #undef TPlugin_new
 #undef TPlugin_delete
 
+/* ========================================================================= */
+/**
+<<IMPLEMENTATION>>
+
+Defines:   TData,
+TDataWriter,
+TDataReader,
+TTypeSupport
+
+Configure and implement 'Buffer1024k' support classes.
+
+Note: Only the #defined classes get defined
+*/
+
+/* ----------------------------------------------------------------- */
+/* DDSDataWriter
+*/
+
+/**
+<<IMPLEMENTATION >>
+
+Defines:   TDataWriter, TData
+*/
+
+/* Requires */
+#define TTYPENAME   Buffer1024kTYPENAME
+
+/* Defines */
+#define TDataWriter Buffer1024kDataWriter
+#define TData       Buffer1024k
+
+#include "dds_cpp/generic/dds_cpp_data_TDataWriter.gen"
+
+#undef TDataWriter
+#undef TData
+
+#undef TTYPENAME
+
+/* ----------------------------------------------------------------- */
+/* DDSDataReader
+*/
+
+/**
+<<IMPLEMENTATION >>
+
+Defines:   TDataReader, TDataSeq, TData
+*/
+
+/* Requires */
+#define TTYPENAME   Buffer1024kTYPENAME
+
+/* Defines */
+#define TDataReader Buffer1024kDataReader
+#define TDataSeq    Buffer1024kSeq
+#define TData       Buffer1024k
+
+#include "dds_cpp/generic/dds_cpp_data_TDataReader.gen"
+
+#undef TDataReader
+#undef TDataSeq
+#undef TData
+
+#undef TTYPENAME
+
+/* ----------------------------------------------------------------- */
+/* TypeSupport
+
+<<IMPLEMENTATION >>
+
+Requires:  TTYPENAME,
+TPlugin_new
+TPlugin_delete
+Defines:   TTypeSupport, TData, TDataReader, TDataWriter
+*/
+
+/* Requires */
+#define TTYPENAME    Buffer1024kTYPENAME
+#define TPlugin_new  Buffer1024kPlugin_new
+#define TPlugin_delete  Buffer1024kPlugin_delete
+
+/* Defines */
+#define TTypeSupport Buffer1024kTypeSupport
+#define TData        Buffer1024k
+#define TDataReader  Buffer1024kDataReader
+#define TDataWriter  Buffer1024kDataWriter
+#define TGENERATE_SER_CODE
+#define TGENERATE_TYPECODE
+
+#include "dds_cpp/generic/dds_cpp_data_TTypeSupport.gen"
+
+#undef TTypeSupport
+#undef TData
+#undef TDataReader
+#undef TDataWriter
+#undef TGENERATE_TYPECODE
+#undef TGENERATE_SER_CODE
+#undef TTYPENAME
+#undef TPlugin_new
+#undef TPlugin_delete
+

@@ -145,7 +145,7 @@ add_executable(ddsSender src/ddsSender.cpp)
 add_dependencies(ddsSender ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ddsSender ${catkin_LIBRARIES} ${RTI_LIBS})
 
-add_executable(ddsNavdataReceiver src/ddsSender.cpp)
+add_executable(ddsNavdataReceiver src/ddsNavdataReceiver.cpp)
 add_dependencies(ddsNavdataReceiver ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ddsNavdataReceiver ${catkin_LIBRARIES} ${RTI_LIBS})
 
