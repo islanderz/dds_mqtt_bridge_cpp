@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Receives CmdVel, takeoff, reset and land messages from the MQTT and publishes on ROS -->
+    <param name="mqttBroker" value="localhost" />
+    <param name="mqttBrokerPort" value="1883" />
+
+    <node name="mqttCmdVelReceiver" pkg="ros_mqtt_bridge_cpp" type="mqttCmdVelReceiver" output="screen" clear_params="true">
+        <param name="loop_rate" value="200" />
+
+        <!-- Make sure the topics published are subscribed with the exact name -->
+
+        <param name="subscribedMqttTopic_land" value="/mqtt/land"/>
+        <param name="publishedRosTopic_land" value="/ardrone/land"/>
+
+        <param name="subscribedMqttTopic_reset" value="/mqtt/reset"/>
+        <param name="publishedRosTopic_reset" value="/ardrone/reset"/>
+
+        <param name="subscribedMqttTopic_takeoff" value="/mqtt/takeoff"/>
+        <param name="publishedRosTopic_takeoff" value="/ardrone/takeoff"/>
+
+        <param name="subscribedMqttTopic_cmdvel" value="/mqtt/cmd_vel"/>
+        <param name="publishedRosTopic_cmdvel" value="/cmd_vel"/>
+
+    </node>
+    <!-- Sends Image and Navdata to the Mqtt broker -->
+    <node name="mqttSender" pkg="ros_mqtt_bridge_cpp" type="mqttSender" output="screen" clear_params="true">
+        <!-- Make sure the topics published are subscribed with the exact name -->
+
+        <param name="ImagePublishFreq" value="30" /> 
+        <param name="NavdataPublishFreq" value="200" />
+
+        <param name="subscribedRosTopic_image" value="/ardrone/image_raw"/>
+        <param name="publishedMqttTopic_image" value="/mqtt/image"/>
+
+        <param name="subscribedRosTopic_navdata" value="/ardrone/navdata"/>
+        <param name="publishedMqttTopic_navdata" value="/mqtt/navdata"/>
+
+    </node>
+   <!--  <node name="mqttPingResponder" pkg="ros_mqtt_bridge_cpp" type="mqttPingResponder" output="screen" clear_params="true"> -->
+   <!--  </node> -->
+</launch>
+
