@@ -3,6 +3,7 @@
 #include "boost/thread.hpp"
 #include <boost/thread/mutex.hpp>
 #include <string>
+#include <sys/time.h>
 
 using namespace std;
 using namespace rti;
@@ -19,6 +20,8 @@ private:
     int ping_count;
 
     DdsConnection* conn;
+    timeval call_time;
+
 public:
     PingSender() : ping_count(0) {
         ping_sink = new DdsDataSender(100, "ping-forth");
@@ -35,6 +38,8 @@ public:
                 boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
                 cout << "sending: " << str << endl;
             }
+
+            gettimeofday(&call_time, NULL);
             ping_sink->sink((char*)str.c_str(), str.length(),
                 AUTO_MSG_ID, true);
             sleep(1);
@@ -46,10 +51,14 @@ public:
     }
 
     virtual void sink(char* data, int len, int msgId, bool isLast) {
+        timeval resp_time;
+        gettimeofday(&resp_time, NULL);
+        double tt = GET_TDIFF(call_time, resp_time);
         string str(data, len);
+        
         {
             boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
-            cout << "received: " << str << endl;
+            cout << "received (" << tt << "): "<< str << endl;
         }
     }
 };

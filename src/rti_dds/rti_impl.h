@@ -12,6 +12,9 @@
 
 #define SSTR( x ) static_cast< ostringstream & >( \
         ( ostringstream() << dec << x ) ).str()
+#define GET_TDIFF(t1, t2) (double) (t2.tv_usec - \
+        t1.tv_usec) / 1000000 + \
+    (double) (t2.tv_sec - t1.tv_sec);
 
 using namespace std;
 
