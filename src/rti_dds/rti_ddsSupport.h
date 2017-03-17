@@ -8,8 +8,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef rti_ddsSupport_1229005866_h
-#define rti_ddsSupport_1229005866_h
+#ifndef rti_ddsSupport_1229005904_h
+#define rti_ddsSupport_1229005904_h
 
 /* Uses */
 #include "rti_dds.h"
@@ -56,5 +56,5 @@ DDS_DATAREADER_CPP(Buffer1024DataReader, Buffer1024Seq, Buffer1024);
 #define NDDSUSERDllExport
 #endif
 
-#endif  /* rti_ddsSupport_1229005866_h */
+#endif  /* rti_ddsSupport_1229005904_h */
 

@@ -26,7 +26,7 @@ public:
     virtual ~RosReceiver();
 
 public:
-    virtual int sink(char* buffer, int len);
+    virtual int sink(char* buffer, int len, bool isLast);
 };
 
 RosReceiver::RosReceiver() {
@@ -37,7 +37,8 @@ RosReceiver::RosReceiver() {
 RosReceiver::~RosReceiver() {
 }
 
-int RosReceiver::sink(char* buffer, int len, int msgId) {
+int RosReceiver::sink(char* buffer, int len, int msgId,
+    bool isLast) {
     // assumption is that message is already assembled
     ardrone_autonomy::Navdata navMsg;
     boost::shared_array<uint8_t> ibuffer(new uint8_t[len]);

@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef rti_ddsPlugin_1229005866_h
-#define rti_ddsPlugin_1229005866_h
+#ifndef rti_ddsPlugin_1229005904_h
+#define rti_ddsPlugin_1229005904_h
 
 #include "rti_dds.h"
 
@@ -271,5 +271,5 @@ extern "C" {
 #define NDDSUSERDllExport
 #endif
 
-#endif /* rti_ddsPlugin_1229005866_h */
+#endif /* rti_ddsPlugin_1229005904_h */
 

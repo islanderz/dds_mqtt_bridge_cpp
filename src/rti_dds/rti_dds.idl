@@ -2,5 +2,6 @@ struct Buffer1024 {
     sequence<octet, 1024>    payload;
     long                     length;
     long                     msg_id;
+    boolean                  is_last;
 };
 

@@ -1,6 +1,7 @@
 #include "rti_impl.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include "rti_dds.h"
 #include "rti_ddsSupport.h"
@@ -28,9 +29,9 @@ namespace rti {
 
     RtiException::RtiException(string cause) : cause(cause) {
     }
-    RtiException::~RtiException() {
+    RtiException::~RtiException() _GLIBCXX_USE_NOEXCEPT {
     }
-    char const * RtiException::what() const {
+    char const * RtiException::what() const throw() {
         return cause.c_str();
     }
 
@@ -56,7 +57,7 @@ namespace rti {
                           retcode));
             }
 
-            participant == NULL;
+            participant = NULL;
         }
     }
 
@@ -69,8 +70,8 @@ namespace rti {
         shutdown();
     }
 
-    DataSender::DataSender(int domainId, string topic_name) :
-        participant(0), msgId(1) {
+    DdsDataSender::DdsDataSender(int domainId, string topic_name) :
+        curr_msgId(1) {
         DDS_ReturnCode_t retcode;
         const char *type_name;
 
@@ -110,21 +111,30 @@ namespace rti {
         instance = Buffer1024TypeSupport::create_data();
         if (instance == NULL)
             crashdown("Buffer1024TypeSupport::create_data error");
+        instance->payload.maximum(0);
     }
-    DataSender::~DataSender() {
+    DdsDataSender::~DdsDataSender() {
         try {
-            published_shutdown();
+            shutdown();
         } catch (RtiException& e) {
             cerr << e.what() << endl;
         }
     }
-    void DataSender::sink(char* data, int len, int msgId) {
+    void DdsDataSender::sink(char* data, int len, int msgId,
+        bool isLast) {
+        if (!isLast)
+            throw RtiException("currently sender-side buffering not supported");
+        if (msgId >= 0)
+            throw RtiException("currently non-automatic msg_ids are not supported");
+
         DDS_ReturnCode_t retcode;
 
-        instance->payload.loan_contiguous(data, len, len);
+        instance->payload.loan_contiguous((DDS_Octet*)data, len, len);
         instance->length = len;
-        instance->msg_id = msgId;
-        retcode = Buffer1024_writer->write(*instance, NULL);
+        instance->msg_id = curr_msgId++;
+        instance->is_last = isLast;
+        retcode = Buffer1024_writer->write(*instance,
+            DDS_HANDLE_NIL);
         instance->payload.unloan();
         if (retcode != DDS_RETCODE_OK)
             throw RtiException(SSTR("write error error" << retcode));
@@ -164,8 +174,8 @@ namespace rti {
         for (i = 0; i < data_seq.length(); ++i) {
             if (info_seq[i].valid_data) {
                 Buffer1024* b = &data_seq[i];
-                sink->sink(b->payload.get_contiguous_buffer(),
-                    b->length, b->msg_id);
+                sink->sink((char*)b->payload.get_contiguous_buffer(),
+                    b->length, b->msg_id, b->is_last);
             }
         }
 
@@ -178,13 +188,10 @@ namespace rti {
     DdsConnection::DdsConnection(IDataSink* rec, int domainId,
                                  string topic_name,
                                  int buff_size) :
-        receiver(rec), participant(0), reader_listener(0),
+        receiver(rec), reader_listener(0),
         buff(new char[buff_size]), buff_len(buff_size),
-        buff_curr_len(0), last_msg_id(-1) {
+        buff_curr_len(0), curr_msg_id(-1) {
         
-        DDS_ReturnCode_t retcode;
-        const char *type_name;
-
         DDS_ReturnCode_t retcode;
         const char *type_name;
 
@@ -231,9 +238,65 @@ namespace rti {
         return 0;
     }
 
-    void DdsConnection::sink(char* data, int len, int msgId) {
-        if (last_msg_id == -1) {
-        } else if (msgId != last_msg_id) {
+    void DdsConnection::sink(char* data, int len, int msgId,
+        bool isLast) {
+        // no need to sync threads, as at this point everything has
+        // been initialized
+
+        if (msgId < 0) {
+            printf("bad msgId\n");
+            dump_buffer();
+            return;
+        }
+
+        if (msgId != curr_msg_id) {
+            if (buff_curr_len) {
+                printf("previous message wasn't marked as last");
+                dump_buffer();
+            }
+
+            if (isLast) {
+                receiver->sink(data, len, msgId, true);
+            } else {
+                add_to_buffer(data, len, msgId, isLast);
+            }
+        } else {
+            add_to_buffer(data, len, msgId, isLast);
+        }
+    }
+
+    void DdsConnection::send_curr_buffer() {
+        receiver->sink(buff, buff_curr_len, curr_msg_id, true);
+        curr_msg_id = -1;
+        buff_curr_len = 0;
+    }
+
+    void DdsConnection::send_curr_incomplete_buffer() {
+        receiver->sink(buff, buff_curr_len, curr_msg_id, false);
+        buff_curr_len = 0;
+    }
+    
+    void DdsConnection::dump_buffer() {
+        buff_curr_len = 0;
+        curr_msg_id = -1;
+    }
+
+    void DdsConnection::add_to_buffer(char* data, int len,
+        int msgId, bool isLast) {
+        curr_msg_id = msgId;
+
+        while (buff_curr_len + len > buff_len) {
+            int nl = min(buff_len - buff_curr_len, len);
+            memcpy(buff + buff_curr_len, data, nl);
+            buff_curr_len += nl;
+            send_curr_incomplete_buffer();
+            len -= nl;
+            data = data + nl;
+        }
+        // len > 0, according to "while" statement above
+        memcpy(buff + buff_curr_len, data, len);
+        if (isLast) {
+            send_curr_buffer();
         }
     }
 

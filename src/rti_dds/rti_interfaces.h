@@ -9,8 +9,18 @@ namespace rti {
 
     class IDataSink {
     public:
-        // msgId < 0 => automatic msgId
-        virtual void sink(char* data, int len, int msgId) = 0;
+        // contract:
+        // - msgId < 0 => automatic msgId; this implies receiver can
+        //   assign message ids itself, if necessary (can be
+        //   omitted if not required)
+        // - ownership of data is not given away with this call
+        // - once method returns, it can be called again immediately
+        // - presence of theLast implies that receiver is able to
+        //   to buffer data if that is required (in some scenarios
+        //   both parties can assume it never happens)
+        // - nothing known about threads, syncing happens as required
+        virtual void sink(char* data, int len, int msgId,
+            bool isLast) = 0;
     };
     
 };

@@ -38,7 +38,7 @@ DDS_TypeCode* Buffer1024_get_typecode()
     static RTIBool is_initialized = RTI_FALSE;
 
     static DDS_TypeCode Buffer1024_g_tc_payload_sequence = DDS_INITIALIZE_SEQUENCE_TYPECODE((1024),NULL);
-    static DDS_TypeCode_Member Buffer1024_g_tc_members[3]=
+    static DDS_TypeCode_Member Buffer1024_g_tc_members[4]=
     {
 
         {
@@ -91,6 +91,23 @@ DDS_TypeCode* Buffer1024_get_typecode()
             DDS_PUBLIC_MEMBER,/* Member visibility */
             1,
             NULL/* Ignored */
+        }, 
+        {
+            (char *)"is_last",/* Member name */
+            {
+                3,/* Representation ID */          
+                DDS_BOOLEAN_FALSE,/* Is a pointer? */
+                -1, /* Bitfield bits */
+                NULL/* Member type code is assigned later */
+            },
+            0, /* Ignored */
+            0, /* Ignored */
+            0, /* Ignored */
+            NULL, /* Ignored */
+            RTI_CDR_REQUIRED_MEMBER, /* Is a key? */
+            DDS_PUBLIC_MEMBER,/* Member visibility */
+            1,
+            NULL/* Ignored */
         }
     };
 
@@ -104,7 +121,7 @@ DDS_TypeCode* Buffer1024_get_typecode()
             0, /* Ignored */
             0, /* Ignored */
             NULL, /* Ignored */
-            3, /* Number of members */
+            4, /* Number of members */
             Buffer1024_g_tc_members, /* Members */
             DDS_VM_NONE  /* Ignored */         
         }}; /* Type code for Buffer1024*/
@@ -119,6 +136,8 @@ DDS_TypeCode* Buffer1024_get_typecode()
     Buffer1024_g_tc_members[1]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_long;
 
     Buffer1024_g_tc_members[2]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_long;
+
+    Buffer1024_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&DDS_g_tc_boolean;
 
     is_initialized = RTI_TRUE;
 
@@ -168,6 +187,10 @@ RTIBool Buffer1024_initialize_w_params(
     }     
 
     if (!RTICdrType_initLong(&sample->msg_id)) {
+        return RTI_FALSE;
+    }     
+
+    if (!RTICdrType_initBoolean(&sample->is_last)) {
         return RTI_FALSE;
     }     
 
@@ -243,6 +266,10 @@ RTIBool Buffer1024_copy(
     }
     if (!RTICdrType_copyLong (
         &dst->msg_id, &src->msg_id)) { 
+        return RTI_FALSE;
+    }
+    if (!RTICdrType_copyBoolean (
+        &dst->is_last, &src->is_last)) { 
         return RTI_FALSE;
     }
 

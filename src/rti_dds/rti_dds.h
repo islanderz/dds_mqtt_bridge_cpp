@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef rti_dds_1229005866_h
-#define rti_dds_1229005866_h
+#ifndef rti_dds_1229005904_h
+#define rti_dds_1229005904_h
 
 #ifndef NDDS_STANDALONE_TYPE
 #ifndef ndds_cpp_h
@@ -46,6 +46,7 @@ class Buffer1024
     DDS_OctetSeq  payload ;
     DDS_Long   length ;
     DDS_Long   msg_id ;
+    DDS_Boolean   is_last ;
 
 };
 #if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)

@@ -1,5 +1,5 @@
 ######################################################################
-#
+#e
 # (c) Copyright, Real-Time Innovations, 2012.  All rights reserved.
 # No duplications, whole or partial, manual or electronic, may be made
 # without express written permission.  Any such copies, or
@@ -30,26 +30,26 @@ ifndef LINKER
 LINKER = g++
 endif
 LINKER_FLAGS = -m32 -static-libgcc -Wl,--no-as-needed
-SYSLIBS = -ldl -lnsl -lm -lpthread -lrt
+SYSLIBS = -ldl -lnsl -lm -lpthread -lrt -lboost_system -lboost_thread
 DEFINES = -DRTI_UNIX -DRTI_LINUX 
-LIBFILES = objs/$(TARGET_ARCH)/rti_dds.o objs/$(TARGET_ARCH)/rti_ddsPlugin.o objs/$(TARGET_ARCH)/rti_ddsSupport.o objs/$(TARGET_ARCH)/ping_publisher.o objs/$(TARGET_ARCH)/ping_subscriber.o 
+LIBFILES = objs/$(TARGET_ARCH)/rti_dds.o objs/$(TARGET_ARCH)/rti_ddsPlugin.o objs/$(TARGET_ARCH)/rti_ddsSupport.o objs/$(TARGET_ARCH)/rti_impl.o
 
 
 INCLUDES = -I. -I$(NDDSHOME)/include -I$(NDDSHOME)/include/ndds 
-       
 LIBS = -L$(NDDSHOME)/lib/$(TARGET_ARCH) \
         -lnddscppz -lnddscz -lnddscorez $(SYSLIBS)
 
 CDRSOURCES    = rti_dds.idl
-COMMONSOURCES = rti_ddsSupport.cxx rti_ddsPlugin.cxx rti_dds.cxx ping_publisher.cxx ping_subscriber.cxx
+COMMONSOURCES = rti_ddsSupport.cxx rti_ddsPlugin.cxx rti_dds.cxx rti_impl.cxx 
 
+EXEC          = test
 DIRECTORIES   = objs.dir objs/$(TARGET_ARCH).dir
 COMMONOBJS    = $(COMMONSOURCES:%.cxx=objs/$(TARGET_ARCH)/%.o)
 
 all: $(TARGET_ARCH) rti_dds.a
 
 rti_dds:
-	rtiddsgen -language C++ -example i86Linux3gcc4.8.2 rti_dds.idl
+	$(NDDSHOME)/bin/rtiddsgen -language C++ -example i86Linux3gcc4.8.2 rti_dds.idl
 
 rti_dds.a: $(LIBFILES)
 	ar rcs $@ $^

@@ -171,6 +171,9 @@ Buffer1024PluginSupport_print_data(
     RTICdrType_printLong(
         &sample->msg_id, "msg_id", indent_level + 1);    
 
+    RTICdrType_printBoolean(
+        &sample->is_last, "is_last", indent_level + 1);    
+
 }
 
 /* ----------------------------------------------------------------------------
@@ -349,6 +352,11 @@ Buffer1024Plugin_serialize(
             return RTI_FALSE;
         }
 
+        if (!RTICdrStream_serializeBoolean(
+            stream, &sample->is_last)) {
+            return RTI_FALSE;
+        }
+
     }
 
     if(serialize_encapsulation) {
@@ -418,6 +426,10 @@ Buffer1024Plugin_deserialize_sample(
         }
         if (!RTICdrStream_deserializeLong(
             stream, &sample->msg_id)) {
+            goto fin; 
+        }
+        if (!RTICdrStream_deserializeBoolean(
+            stream, &sample->is_last)) {
             goto fin; 
         }
     }
@@ -567,6 +579,9 @@ RTIBool Buffer1024Plugin_skip(
         if (!RTICdrStream_skipLong (stream)) {
             goto fin; 
         }
+        if (!RTICdrStream_skipBoolean (stream)) {
+            goto fin; 
+        }
     }
 
     done = RTI_TRUE;
@@ -617,6 +632,9 @@ Buffer1024Plugin_get_serialized_sample_max_size_ex(
         current_alignment);
 
     current_alignment +=RTICdrType_getLongMaxSizeSerialized(
+        current_alignment);
+
+    current_alignment +=RTICdrType_getBooleanMaxSizeSerialized(
         current_alignment);
 
     if (include_encapsulation) {
@@ -676,6 +694,8 @@ Buffer1024Plugin_get_serialized_sample_min_size(
         current_alignment);
     current_alignment +=RTICdrType_getLongMaxSizeSerialized(
         current_alignment);
+    current_alignment +=RTICdrType_getBooleanMaxSizeSerialized(
+        current_alignment);
 
     if (include_encapsulation) {
         current_alignment += encapsulation_size;
@@ -725,6 +745,8 @@ Buffer1024Plugin_get_serialized_sample_size(
     current_alignment += RTICdrType_getLongMaxSizeSerialized(
         current_alignment);
     current_alignment += RTICdrType_getLongMaxSizeSerialized(
+        current_alignment);
+    current_alignment += RTICdrType_getBooleanMaxSizeSerialized(
         current_alignment);
 
     if (include_encapsulation) {

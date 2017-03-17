@@ -61,24 +61,28 @@ int RosSender::loop() {
 RosSender::~RosSender() {
 }
 
-void RosSender::imageMessageCallback(const sensor_msgs::ImageConstPtr msg) {
-    uint32_t serial_size = ros::serialization::serializationLength(*msg);
+void RosSender::imageMessageCallback(
+    const sensor_msgs::ImageConstPtr msg) {
+    uint32_t serial_size = ros::serialization::serializationLength(
+        *msg);
     boost::shared_array<uint8_t> obuffer(new uint8_t[serial_size]);
 
     ros::serialization::OStream ostream(obuffer.get(), serial_size);
     ros::serialization::serialize(ostream, *msg);
 
-    imageSender->sink(obuffer.get(), serial_size, AUTO_MSG_ID);
+    imageSender->sink(obuffer.get(), serial_size, AUTO_MSG_ID, true);
 }
 
-void RosSender::navdataMessageCallback(const ardrone_autonomy::NavdataConstPtr msg) {
-    uint32_t serial_size = ros::serialization::serializationLength(*mpsg);
+void RosSender::navdataMessageCallback(
+    const ardrone_autonomy::NavdataConstPtr msg) {
+    uint32_t serial_size = ros::serialization::serializationLength(
+        *mpsg);
     boost::shared_array<uint8_t> obuffer(new uint8_t[serial_size]);
 
     ros::serialization::OStream ostream(obuffer.get(), serial_size);
     ros::serialization::serialize(ostream, *msg);
 
-    navDataSender->sink(obuffer.get(), serial_size);
+    navDataSender->sink(obuffer.get(), serial_size, true);
 }
 
 int main(int argc, char **argv) {
