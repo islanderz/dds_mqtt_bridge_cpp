@@ -23,6 +23,7 @@ private:
     IDataSink* navDataSender;
     ros::Subscriber vid_sub;
     ros::Subscriber navdata_sub;
+    char* buff;
 
 public:
     RosSender(IDataSink* imageSender,
@@ -40,7 +41,8 @@ RosSender::RosSender(IDataSink* imageSender,
     rosRate(30),
     nodeHandle(),
     imageSender(imageSender),
-    navDataSender(navDataSender) {
+    navDataSender(navDataSender),
+    buff(new char[1024*1024]) {
     
     vid_sub = nodeHandle.subscribe
         ("/ardrone/image_raw",
@@ -70,11 +72,15 @@ void RosSender::imageMessageCallback(
     const sensor_msgs::ImageConstPtr msg) {
     uint32_t serial_size = ros::serialization::serializationLength(
         *msg);
-    boost::shared_array<uint8_t> obuffer(new uint8_t[serial_size]);
 
-    ros::serialization::OStream ostream(obuffer.get(), serial_size);
+    if (serial_size > 1024*1024) {
+        printf("too large image");
+        exit(1);
+    }
+        
+    ros::serialization::OStream ostream((uint8_t*)buff, serial_size);
     ros::serialization::serialize(ostream, *msg);
-    imageSender->sink((char*)obuffer.get(), serial_size,
+    navDataSender->sink(buff, (int)serial_size,
         AUTO_MSG_ID, true);
 }
 
@@ -82,11 +88,15 @@ void RosSender::navdataMessageCallback(
     const ardrone_autonomy::NavdataConstPtr msg) {
     uint32_t serial_size = ros::serialization::serializationLength(
         *msg);
-    boost::shared_array<uint8_t> obuffer(new uint8_t[serial_size]);
 
-    ros::serialization::OStream ostream(obuffer.get(), serial_size);
+    if (serial_size > 1024*1024) {
+        printf("too large navdata");
+        exit(1);
+    }
+        
+    ros::serialization::OStream ostream((uint8_t*)buff, serial_size);
     ros::serialization::serialize(ostream, *msg);
-    navDataSender->sink((char*)obuffer.get(), (int)serial_size,
+    navDataSender->sink(buff, (int)serial_size,
         AUTO_MSG_ID, true);
 }
 

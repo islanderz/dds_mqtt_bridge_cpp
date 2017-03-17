@@ -45,9 +45,9 @@ void RosReceiver::sink(char* buffer, int len, int msgId,
     
     // assumption is that message is already assembled
     ardrone_autonomy::Navdata navMsg;
-    boost::shared_array<uint8_t> ibuffer(new uint8_t[len]);
     ros::serialization::IStream istream((uint8_t*)buffer, len);
     ros::serialization::deserialize(istream, navMsg);
+
     navdataPub.publish(navMsg);
 }
 
