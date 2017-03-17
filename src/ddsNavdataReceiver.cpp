@@ -4,6 +4,8 @@
 #include "rti_dds/rti_impl.h"
 #include "rti_dds/rti_interfaces.h"
 
+using namespace rti;
+
 // TODO: random node id
 // TODO: add log infos
 // TODO:     nodeHandle.getParam("/ddsNavDataDomain", navDataDomain);
@@ -13,7 +15,7 @@
 // TODO: consider threading model once more, mutexes, etc.
 // TODO: message number
 
-class RosReceiver : public rti::IDataSink {
+class RosReceiver : public IDataSink {
 private:
     int rosRate;
     ros::NodeHandle nodeHandle;
@@ -51,7 +53,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "ddsNavdataReceiver");
 
     RosReceiver rr();
-    rti::DdsConnection conn(&rr);
+    DdsConnection conn(&rr);
     return conn.loop();
 }
 

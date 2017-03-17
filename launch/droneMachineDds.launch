@@ -5,18 +5,22 @@
     <param name="ddsImageDomainId" value="20"/>
     <param name="ddsNavDataDomainId" value="30"/>
 
-    <node name="ddsCmdVelReceiver" pkg="ros_mqtt_bridge_cpp" type="ddsCmdVelReceiver" output="screen" clear_params="true">
+    <!--
+    <node name="ddsCmdVelReceiver" pkg="dds_mqtt_bridge_cpp" type="ddsCmdVelReceiver" output="screen" clear_params="true">
         <param name="loop_rate" value="200" />
 
-        <!-- Make sure the topics published are subscribed with the exact name -->
+
         <param name="publishedRosTopic_land" value="/ardrone/land"/>
         <param name="publishedRosTopic_reset" value="/ardrone/reset"/>
         <param name="publishedRosTopic_takeoff" value="/ardrone/takeoff"/>
         <param name="publishedRosTopic_cmdvel" value="/cmd_vel"/>
 
     </node>
+
+    -->
+    
     <!-- Sends Image and Navdata to the DDS domain -->
-    <node name="ddsSender" pkg="ros_mqtt_bridge_cpp" type="ddsSender" output="screen" clear_params="true">
+    <node name="ddsSender" pkg="dds_mqtt_bridge_cpp" type="ddsSender" output="screen" clear_params="true">
         <!-- Make sure the topics published are subscribed with the exact name -->
 
         <param name="ImagePublishFreq" value="30" /> 
@@ -25,6 +29,6 @@
         <param name="subscribedRosTopic_image" value="/ardrone/image_raw"/>
         <param name="subscribedRosTopic_navdata" value="/ardrone/navdata"/>
 
-    </node>
+    </node> 
 </launch>
 

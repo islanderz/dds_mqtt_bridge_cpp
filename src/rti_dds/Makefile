@@ -46,12 +46,12 @@ EXEC          = test
 DIRECTORIES   = objs.dir objs/$(TARGET_ARCH).dir
 COMMONOBJS    = $(COMMONSOURCES:%.cxx=objs/$(TARGET_ARCH)/%.o)
 
-all: $(TARGET_ARCH) rti_dds.a
+all: $(TARGET_ARCH) librti_dds.a
 
 rti_dds:
 	$(NDDSHOME)/bin/rtiddsgen -language C++ -example i86Linux3gcc4.8.2 rti_dds.idl
 
-rti_dds.a: $(LIBFILES)
+librti_dds.a: $(LIBFILES)
 	ar rcs $@ $^
 
 # We actually stick the objects in a sub directory to keep your directory clean.

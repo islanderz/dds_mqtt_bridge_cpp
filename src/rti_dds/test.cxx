@@ -11,7 +11,6 @@ using namespace rti;
 boost::mutex io_mutex;
 
 // TODO: message should be split (larger than 1024)
-// TODO: add time measurements
 
 class PingSender : public IDataSink {
 private:

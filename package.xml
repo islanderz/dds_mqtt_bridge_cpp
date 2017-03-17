@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>ros_mqtt_bridge_cpp</name>
+  <name>dds_mqtt_bridge_cpp</name>
   <version>0.0.0</version>
-  <description>The ros_mqtt_bridge_cpp package</description>
+  <description>The dds_mqtt_bridge_cpp package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->

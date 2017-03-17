@@ -5,29 +5,28 @@
 #include "rti_dds/rti_impl.h"
 #include "rti_dds/rti_interfaces.h"
 
+using namespace rti;
+
 // TODO: random node id
 // TODO: add log infos
 // TODO:     nodeHandle.getParam("/ddsNavDataDomain", navDataDomain);
 // TODO: errors may arise
 // TODO: add last image sent stats
 // TODO: catch exceptions
+// TODO: remove MQTT files from the project
 
 class RosSender {
 private:
     int rosRate;
     ros::NodeHandle nodeHandle;
-    rti::IDataSink* imageSender;
-    rti::IDataSink* navDataSender;
+    IDataSink* imageSender;
+    IDataSink* navDataSender;
     ros::Subscriber vid_sub;
     ros::Subscriber navdata_sub;
 
 public:
-    RosSender(rti::IDataSink imageSender,
-              rti::IDataSink navDataSender) :
-        rosRate(30),
-        nodeHandle(),
-        imageSender(imageSender),
-        navDataSender(navDataSender);
+    RosSender(IDataSink* imageSender,
+        IDataSink* navDataSender);
     virtual ~RosSender();
     int loop();
 
@@ -36,7 +35,13 @@ public:
     void navdataMessageCallback(const ardrone_autonomy::NavdataConstPtr msg);
 };
 
-RosSender::RosSender(rti::IDataSender sender) {
+RosSender::RosSender(IDataSink* imageSender,
+    IDataSink* navDataSender) :
+    rosRate(30),
+    nodeHandle(),
+    imageSender(imageSender),
+    navDataSender(navDataSender) {
+    
     vid_sub = nodeHandle.subscribe
         ("/ardrone/image_raw",
          10,
@@ -69,26 +74,26 @@ void RosSender::imageMessageCallback(
 
     ros::serialization::OStream ostream(obuffer.get(), serial_size);
     ros::serialization::serialize(ostream, *msg);
-
-    imageSender->sink(obuffer.get(), serial_size, AUTO_MSG_ID, true);
+    imageSender->sink((char*)obuffer.get(), serial_size,
+        AUTO_MSG_ID, true);
 }
 
 void RosSender::navdataMessageCallback(
     const ardrone_autonomy::NavdataConstPtr msg) {
     uint32_t serial_size = ros::serialization::serializationLength(
-        *mpsg);
+        *msg);
     boost::shared_array<uint8_t> obuffer(new uint8_t[serial_size]);
 
     ros::serialization::OStream ostream(obuffer.get(), serial_size);
     ros::serialization::serialize(ostream, *msg);
-
-    navDataSender->sink(obuffer.get(), serial_size, true);
+    navDataSender->sink((char*)obuffer.get(), (int)serial_size,
+        AUTO_MSG_ID, true);
 }
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ddsSender");
-    rti::DdsDataSender ddsImageSender;
-    rti::DdsDataSender ddsNavDataSender;
+    DdsDataSender ddsImageSender(100, "ros-images");
+    DdsDataSender ddsNavDataSender(200, "ros-navdata");
     RosSender rs(&ddsImageSender, &ddsNavDataSender);
     return rs.loop();
 }
