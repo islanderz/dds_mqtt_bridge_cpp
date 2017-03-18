@@ -46,17 +46,17 @@ RosReceiver::~RosReceiver() {
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
-    if (frame_num == 0)
-        gettimeofday(&last_img_time, NULL);
-    frame_num++;
     if (frame_num == 30) {
         frame_num = 0;
         timeval img_time;
         gettimeofday(&img_time, NULL);        
         double tt = GET_TDIFF(last_img_time, img_time);
         tt = tt / 30;
-        cerr << "Avg. frame time: " << tt << endl;
-    }
+        cerr << "Avg. image frame time: " << tt << endl;
+    } 
+    if (frame_num == 0)
+        gettimeofday(&last_img_time, NULL);
+    frame_num++;
     
     // assumption is that message is already assembled
     sensor_msgs::Image image_msg;

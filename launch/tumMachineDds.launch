@@ -10,13 +10,13 @@
 
         <param name="publishedRosTopic_image" value="/tum_ardrone/image"/>
     </node>
-    <!--
-    <node name="ddsNavdataReceiver" pkg="ros_mqtt_bridge_cpp" type="ddsNavdataReceiver" output="screen" clear_params="true">
+
+    <node name="ddsNavdataReceiver" pkg="dds_mqtt_bridge_cpp" type="ddsNavdataReceiver" output="screen" clear_params="true">
         <param name="loop_rate" value="250" />
 
         <param name="publishedRosTopic_navdata" value="/tum_ardrone/navdata"/>
     </node>
--->    
+
     <!--  Sends CmdVel, takeoff, reset and land messages to the DDS broker
     <node name="ddsCmdVelSender" pkg="dds_mqtt_bridge_cpp" type="ddsCmdVelSender" output="screen" clear_params="true">
 
