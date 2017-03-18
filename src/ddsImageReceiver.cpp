@@ -38,7 +38,7 @@ RosReceiver::RosReceiver() :
     nodeHandle(),
     frame_num(0) {
     image_transport::ImageTransport img_trans(nodeHandle);    
-    imagePub = img_trans.advertise("/ardrone/image_raw", 1);
+    imagePub = img_trans.advertise("/tum_ardrone/image", 1);
 }
 
 RosReceiver::~RosReceiver() {
