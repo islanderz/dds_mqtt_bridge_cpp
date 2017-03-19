@@ -3,6 +3,7 @@
 #include <ardrone_autonomy/Navdata.h>
 #include "rti_dds/rti_impl.h"
 #include "rti_dds/rti_interfaces.h"
+#include <fstream>
 
 using namespace rti;
 
@@ -22,6 +23,7 @@ private:
     ros::Publisher navdataPub;
     timeval last_img_time;
     int frame_num;
+    std::ofstream log_file_ros_navdata_recv;	
 
 public:
     RosReceiver();
@@ -32,26 +34,42 @@ public:
 };
 
 RosReceiver::RosReceiver() :
-    rosRate(30),
+    rosRate(200),
     nodeHandle(),
     frame_num(0) {
     
     navdataPub = nodeHandle.advertise<ardrone_autonomy::Navdata>
         ("/tum_ardrone/navdata", 1);
+
+    std::stringstream ss;
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer,80,"%d_%m_%Y_%H_%M_%S",timeinfo);
+    std::string date_time(buffer);
+
+    ss << "log_file_dds_navdata_av_delays_" << date_time << ".txt";
+    log_file_ros_navdata_recv.open(ss.str(), std::ofstream::out | std::ofstream::app);
 }
 
 RosReceiver::~RosReceiver() {
+     log_file_ros_navdata_recv.close();
 }
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
-    if (frame_num == 30) {
+    if (frame_num == 200) {
         frame_num = 0;
         timeval img_time;
         gettimeofday(&img_time, NULL);        
         double tt = GET_TDIFF(last_img_time, img_time);
-        tt = tt / 30;
+        tt = tt / 200;
         cerr << "Avg. navdata frame time: " << tt << endl;
+        
+        log_file_ros_navdata_recv << std::fixed << tt << " " << std::endl;
     } 
     if (frame_num == 0)
         gettimeofday(&last_img_time, NULL);
