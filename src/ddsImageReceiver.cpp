@@ -26,7 +26,6 @@ private:
     timeval last_img_time;
     int frame_num;
     std::ofstream log_file_ros_image_recv;	
-
 public:
     RosReceiver();
     virtual ~RosReceiver();
@@ -40,6 +39,8 @@ RosReceiver::RosReceiver() :
     rosRate(30),
     nodeHandle(),
     frame_num(0) {
+
+    gettimeofday(&last_img_time, NULL);
    
     image_transport::ImageTransport img_trans(nodeHandle);    
     imagePub = img_trans.advertise("/tum_ardrone/image", 1);
@@ -64,21 +65,17 @@ RosReceiver::~RosReceiver() {
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
-    if (frame_num == 30) {
+    timeval img_time;
+    gettimeofday(&img_time, NULL);        
+    double tt = GET_TDIFF(last_img_time, img_time);
+
+    if (tt > 1.0) {
+        cerr << "Image frame rate: " << frame_num << endl;
+    	log_file_ros_image_recv << std::fixed << frame_num << " " << std::endl;
         frame_num = 0;
-        timeval img_time;
-        gettimeofday(&img_time, NULL);        
-        double tt = GET_TDIFF(last_img_time, img_time);
-        tt = tt / 30;
-        cerr << "Avg. image frame time: " << tt << endl;
+        last_img_time = img_time;
+    } else frame_num++;
 
-    	log_file_ros_image_recv << std::fixed << tt << " " << std::endl;
-    } 
-
-    if (frame_num == 0)
-        gettimeofday(&last_img_time, NULL);
-    frame_num++;
-    
     // assumption is that message is already assembled
     sensor_msgs::Image image_msg;
     ros::serialization::IStream istream((uint8_t*)buffer, len);

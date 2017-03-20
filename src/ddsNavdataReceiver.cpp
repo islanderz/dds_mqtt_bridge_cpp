@@ -37,6 +37,8 @@ RosReceiver::RosReceiver() :
     rosRate(200),
     nodeHandle(),
     frame_num(0) {
+
+    gettimeofday(&last_img_time, NULL);
     
     navdataPub = nodeHandle.advertise<ardrone_autonomy::Navdata>
         ("/tum_ardrone/navdata", 1);
@@ -61,19 +63,17 @@ RosReceiver::~RosReceiver() {
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
-    if (frame_num == 200) {
+
+    timeval img_time;
+    gettimeofday(&img_time, NULL);        
+    double tt = GET_TDIFF(last_img_time, img_time);
+
+    if (tt > 1.0) {
+        cerr << "Navdata frame rate: " << frame_num << endl;
+    	log_file_ros_navdata_recv << std::fixed << frame_num << " " << std::endl;
         frame_num = 0;
-        timeval img_time;
-        gettimeofday(&img_time, NULL);        
-        double tt = GET_TDIFF(last_img_time, img_time);
-        tt = tt / 200;
-        cerr << "Avg. navdata frame time: " << tt << endl;
-        
-        log_file_ros_navdata_recv << std::fixed << tt << " " << std::endl;
-    } 
-    if (frame_num == 0)
-        gettimeofday(&last_img_time, NULL);
-    frame_num++;
+        last_img_time = img_time;
+    } else frame_num++;
     
     // assumption is that message is already assembled
     ardrone_autonomy::Navdata navMsg;
