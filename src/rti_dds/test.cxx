@@ -10,7 +10,11 @@ using namespace rti;
 
 boost::mutex io_mutex;
 
-// TODO: message should be split (larger than 1024)
+#ifndef BUFF_SIZE
+#define BUFF_SIZE 1024*1024
+#endif
+
+// TODO: message should be split (larger than 1024 * 1024)
 
 class PingSender : public IDataSink {
 private:
@@ -20,11 +24,14 @@ private:
 
     DdsConnection* conn;
     timeval call_time;
+    char* buff;
 
 public:
-    PingSender() : ping_count(0) {
+    PingSender() : ping_count(0), buff(new char[BUFF_SIZE]) {
         ping_sink = new DdsDataSender(100, "ping-forth");
         conn = new DdsConnection(this, 200, "ping-back", 128);
+        for (int i = 0; i < BUFF_SIZE; i++)
+            buff[i] = (char)(i % 255);
     }
     void start_loop() {
         t = new boost::thread(&PingSender::loop, this);
@@ -34,13 +41,14 @@ public:
         while (1) {
             string str(SSTR("ping " << ping_count++));
             {
-                boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
+                boost::unique_lock<boost::mutex> scoped_lock(
+                    io_mutex);
                 cout << "sending: " << str << endl;
             }
 
             gettimeofday(&call_time, NULL);
-            ping_sink->sink((char*)str.c_str(), str.length(),
-                AUTO_MSG_ID, true);
+            sprintf(buff, "%s", str.c_str());
+            ping_sink->sink(buff, BUFF_SIZE, AUTO_MSG_ID, true);
             sleep(1);
         }
     }
@@ -53,7 +61,7 @@ public:
         timeval resp_time;
         gettimeofday(&resp_time, NULL);
         double tt = GET_TDIFF(call_time, resp_time);
-        string str(data, len);
+        string str(data);
         
         {
             boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
@@ -67,21 +75,25 @@ private:
     boost::thread* t;
     IDataSink* back_sink;
     DdsConnection* conn;
+    char* buff;
+
 public:
-    PingReceiver() {
+    PingReceiver() : buff(new char[BUFF_SIZE]) {
         back_sink = new DdsDataSender(200, "ping-back");
         conn = new DdsConnection(this, 100, "ping-forth", 128);
+        for (int i = 0; i < BUFF_SIZE; i++)
+            buff[i] = (char)(i % 255);
     }
     
     virtual void sink(char* data, int len, int msgId, bool isLast) {
-        string str(data, len);
+        string str(data);
         {
             boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
             cout << "answering: " << str << endl;
         }
-        string answer(SSTR("reply to " << str));
-        back_sink->sink((char*)answer.c_str(), answer.length(),
-            AUTO_MSG_ID, true);
+
+        sprintf(buff, "reply to %s", str.c_str());
+        back_sink->sink(buff, BUFF_SIZE, AUTO_MSG_ID, true);
     }
 
 };
