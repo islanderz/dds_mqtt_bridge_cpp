@@ -25,7 +25,8 @@ private:
     image_transport::Publisher imagePub;
     timeval last_img_time;
     int frame_num;
-    std::ofstream log_file_ros_image_recv;	
+    std::ofstream log_file_ros_image_recv;
+    double time_spent;
 public:
     RosReceiver();
     virtual ~RosReceiver();
@@ -38,7 +39,8 @@ public:
 RosReceiver::RosReceiver() :
     rosRate(30),
     nodeHandle(),
-    frame_num(0) {
+    frame_num(0),
+    time_spent(0) {
 
     gettimeofday(&last_img_time, NULL);
    
@@ -65,23 +67,31 @@ RosReceiver::~RosReceiver() {
 
 void RosReceiver::sink(char* buffer, int len, int msgId,
     bool isLast) {
-    timeval img_time;
-    gettimeofday(&img_time, NULL);        
-    double tt = GET_TDIFF(last_img_time, img_time);
-
-    if (tt > 1.0) {
-        cerr << "Image frame rate: " << frame_num << endl;
-    	log_file_ros_image_recv << std::fixed << frame_num << " " << std::endl;
-        frame_num = 0;
-        last_img_time = img_time;
-    } else frame_num++;
 
     // assumption is that message is already assembled
     sensor_msgs::Image image_msg;
     ros::serialization::IStream istream((uint8_t*)buffer, len);
     ros::serialization::deserialize(istream, image_msg);
-
     imagePub.publish(image_msg);
+
+    timeval img_time;
+    gettimeofday(&img_time, NULL);        
+    double tt = GET_TDIFF(last_img_time, img_time);
+    
+    ros::Time thisTime = ros::Time::now();
+    ros::Duration diff = thisTime - image_msg.header.stamp;
+    time_spent += diff.toSec();
+    frame_num++;
+
+    if (tt > 1.0) {
+        cerr << "Image frame rate, avg. delay: " << frame_num <<
+            ", " << std::fixed << time_spent / frame_num << endl;
+    	log_file_ros_image_recv << std::fixed << frame_num << " " << std::endl;
+        
+        frame_num = 0;
+        last_img_time = img_time;
+        time_spent = 0;
+    }
 }
 
 int main(int argc, char **argv) {
