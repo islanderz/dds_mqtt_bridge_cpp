@@ -155,10 +155,18 @@ target_link_libraries(ddsImageReceiver ${catkin_LIBRARIES} ${RTI_LIBS})
 
 add_executable(sys_ping src/ping/sys_ping.cxx)
 add_dependencies(sys_ping ${catkin_EXPORTED_TARGETS})
-target_link_libraries(sys_ping ${catkin_LIBRARIES} )
+target_link_libraries(sys_ping ${catkin_LIBRARIES})
+
+add_executable(total_ping src/ping/total_ping.cxx)
+add_dependencies(total_ping ${catkin_EXPORTED_TARGETS})
+target_link_libraries(total_ping ${catkin_LIBRARIES} ${RTI_LIBS})
+
+add_executable(ping_responder src/ping/ping_responder.cxx)
+add_dependencies(ping_responder ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ping_responder ${catkin_LIBRARIES} ${RTI_LIBS})
 
 
-install(TARGETS ddsSender ddsNavdataReceiver ddsImageReceiver RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(TARGETS ddsSender ddsNavdataReceiver ddsImageReceiver total_ping ping_responder RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 
 install(DIRECTORY launch/

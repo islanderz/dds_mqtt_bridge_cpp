@@ -14,6 +14,7 @@ boost::mutex io_mutex;
 #define BUFF_SIZE 1024*1024
 #endif
 
+
 // TODO: message should be split (larger than 1024 * 1024)
 
 class PingSender : public IDataSink {
@@ -27,7 +28,8 @@ private:
     char* buff;
 
 public:
-    PingSender() : ping_count(0), buff(new char[BUFF_SIZE]) {
+    PingSender() : ping_count(0),
+                   buff(new char[BUFF_SIZE]) {
         ping_sink = new DdsDataSender(100, "ping-forth");
         conn = new DdsConnection(this, 200, "ping-back", 128);
         for (int i = 0; i < BUFF_SIZE; i++)
@@ -99,6 +101,7 @@ public:
 };
 
 int main() {
+    
     PingReceiver pr;
     PingSender ps;
     ps.start_loop();

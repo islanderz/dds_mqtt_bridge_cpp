@@ -146,7 +146,7 @@ namespace rti {
     
     void Buffer1024kListener::on_data_available(
         DDSDataReader* reader) {
-        
+
         Buffer1024kDataReader *Buffer1024k_reader = NULL;
         Buffer1024kSeq data_seq;
         DDS_SampleInfoSeq info_seq;
@@ -246,7 +246,6 @@ namespace rti {
         bool isLast) {
         // no need to sync threads, as at this point everything has
         // been initialized
-
         if (msgId < 0) {
             printf("bad msgId\n");
             dump_buffer();

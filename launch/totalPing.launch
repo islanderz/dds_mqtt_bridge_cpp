@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="total_ping" pkg="dds_mqtt_bridge_cpp" type="total_ping" output="screen" clear_params="true">
+    </node>
+</launch>
+
