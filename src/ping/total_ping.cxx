@@ -16,8 +16,7 @@ using namespace rti;
 #define DDS_2K      3
 #define STAT_LEN    4
 
-// #define WIFI_IP 192.168.1.1
-#define WIFI_IP "localhost"
+#define WIFI_IP 192.168.1.1
 
 
 class PingStats {
