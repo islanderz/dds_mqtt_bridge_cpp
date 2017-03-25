@@ -115,9 +115,9 @@ public:
             res500 = min(1000.0f,max(10.0f,res500));
             res20000 = min(1000.0f,max(10.0f,res20000));
 
-            // update
-            p500 = 0.7 * p500 + 0.3 * res500;
-            p20000 = 0.7 * p20000 + 0.3 * res20000;
+            // update Dont smooth out here
+            // p500 = 0.7 * p500 + 0.3 * res500;
+            // p20000 = 0.7 * p20000 + 0.3 * res20000;
 
             // send
             sendbuff[0] = (double)p500;
