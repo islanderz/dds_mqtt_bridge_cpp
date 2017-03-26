@@ -25,18 +25,17 @@ private:
 public:
     
     void write_stat(int stat_pos, double value) {
-        boost::unique_lock<boost::mutex> scoped_lock(
-            io_mutex);
+        boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
         values[stat_pos] = value;
     }
 
-    double get_value(int stat_pos) {
-        return values[stat_pos];
+    void write_sum_stat(int target_pos, int src_pos, double value) {
+        boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
+        values[target_pos] = values[src_pos] + value;
     }
-    
+
     void get_values(double *output_values) {
-        boost::unique_lock<boost::mutex> scoped_lock(
-            io_mutex);
+        boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
         memcpy((char*)output_values, (char*)values,
             STAT_LEN * sizeof(double));
     }
@@ -54,8 +53,8 @@ public:
     // Writing the WiFi ping values.
     virtual void sink(char* data, int len, int msgId, bool isLast) {
         double* data2 = (double*)data;
-        ps->write_stat(WIFI_500, data2[0]);
-        ps->write_stat(WIFI_2K, data2[1]);
+        ps->write_sum_stat(WIFI_500, DDS_500, data2[0]);
+        ps->write_sum_stat(WIFI_2K, DDS_2K, data2[1]);
     }
 };
 
@@ -124,11 +123,6 @@ public:
             buff500[i] = (char)(i % 255);
         for (int i = 0; i < 20000; i++)
             buff2k[i] = (char)(i % 255);
-    }
-
-
-    ~DdsPinger() {
-	
     }
 
     void start() {
