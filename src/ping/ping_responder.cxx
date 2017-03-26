@@ -10,6 +10,7 @@ using namespace std;
 using namespace rti;
 
 #define WIFI_IP "192.168.1.1"
+//#define WIFI_IP "localhost"
 
 class PingReceiver : public IDataSink {
 private:
