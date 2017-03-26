@@ -25,7 +25,7 @@ TARGET_ARCH = i86Linux3gcc4.8.2
 ifndef COMPILER
 COMPILER = g++
 endif
-COMPILER_FLAGS = -m32 -Wall
+COMPILER_FLAGS = -g -m32 -Wall
 ifndef LINKER
 LINKER = g++
 endif
