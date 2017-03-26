@@ -153,10 +153,6 @@ add_executable(ddsImageReceiver src/ddsImageReceiver.cpp)
 add_dependencies(ddsImageReceiver ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ddsImageReceiver ${catkin_LIBRARIES} ${RTI_LIBS})
 
-add_executable(sys_ping src/ping/sys_ping.cxx)
-add_dependencies(sys_ping ${catkin_EXPORTED_TARGETS})
-target_link_libraries(sys_ping ${catkin_LIBRARIES})
-
 add_executable(total_ping src/ping/total_ping.cxx)
 add_dependencies(total_ping ${catkin_EXPORTED_TARGETS})
 target_link_libraries(total_ping ${catkin_LIBRARIES} ${RTI_LIBS})
