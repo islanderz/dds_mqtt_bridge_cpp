@@ -53,6 +53,7 @@ public:
     // Writing the WiFi ping values.
     virtual void sink(char* data, int len, int msgId, bool isLast) {
         double* data2 = (double*)data;
+        cerr << " WIFI RTT: " << data2[0] << " - " <<  data2[1] << endl;
         ps->write_sum_stat(WIFI_500, DDS_500, data2[0]);
         ps->write_sum_stat(WIFI_2K, DDS_2K, data2[1]);
     }
@@ -95,6 +96,7 @@ private:
 	
 	// Computing & Wriing DDS RTT
         double tt = GET_TDIFF(call_time, resp_time);
+
         ps->write_stat(stat_pos, tt*1000);
         // TODO P1 - Need to overwrite the value of values[WIFI_500] (which is same as values[stat_pos+1]) with Wifi+DDS delay
         // TODO P1 - Need to overwrite the value of values[WIFI_2K] (which is  also values[stat_pos+1]) with wifi+DDS delay

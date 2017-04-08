@@ -20,16 +20,16 @@
 # linker should be on your PATH.)
 ######################################################################
 
-TARGET_ARCH = i86Linux3gcc4.8.2
+TARGET_ARCH = x64Linux3gcc4.8.2
 
 ifndef COMPILER
 COMPILER = g++
 endif
-COMPILER_FLAGS = -g -m32 -Wall
+COMPILER_FLAGS = -g -m64 -Wall
 ifndef LINKER
 LINKER = g++
 endif
-LINKER_FLAGS = -m32 -static-libgcc -Wl,--no-as-needed
+LINKER_FLAGS = -m64 -static-libgcc -Wl,--no-as-needed
 SYSLIBS = -ldl -lnsl -lm -lpthread -lrt -lboost_system -lboost_thread
 DEFINES = -DRTI_UNIX -DRTI_LINUX 
 LIBFILES = objs/$(TARGET_ARCH)/rti_dds.o objs/$(TARGET_ARCH)/rti_ddsPlugin.o objs/$(TARGET_ARCH)/rti_ddsSupport.o objs/$(TARGET_ARCH)/rti_impl.o
@@ -49,7 +49,7 @@ COMMONOBJS    = $(COMMONSOURCES:%.cxx=objs/$(TARGET_ARCH)/%.o)
 all: $(TARGET_ARCH) librti_dds.a
 
 rti_dds:
-	$(NDDSHOME)/bin/rtiddsgen -language C++ -example i86Linux3gcc4.8.2 rti_dds.idl
+	$(NDDSHOME)/bin/rtiddsgen -language C++ -example x64Linux3gcc4.8.2 rti_dds.idl
 
 librti_dds.a: $(LIBFILES)
 	ar rcs $@ $^

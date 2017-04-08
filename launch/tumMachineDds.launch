@@ -4,6 +4,7 @@
     
     <param name="ddsImageDomainId" value="20"/>
     <param name="ddsNavDataDomainId" value="30"/>
+    <param name="offset" value="0" />
 
     <node name="ddsImageReceiver" pkg="dds_mqtt_bridge_cpp" type="ddsImageReceiver" output="screen" clear_params="true">
         <param name="loop_rate" value="30" />
@@ -26,5 +27,7 @@
         <param name="subscribedRosTopic_cmdvel" value="/cmd_vel"/>
     </node>
      </node> -->
+    <node name="total_ping" pkg="dds_mqtt_bridge_cpp" type="total_ping" output="screen" clear_params="true">
+    </node>
 </launch>
 

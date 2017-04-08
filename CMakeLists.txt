@@ -135,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(ros_mqtt_bridge_cpp_node src/ros_mqtt_bridge_cpp_node.cpp)
 
-set(ENV{TARGET_ARCH} "i86Linux3gcc4.8.2")
+set(ENV{TARGET_ARCH} "x64Linux3gcc4.8.2")
 include_directories($ENV{NDDSHOME}/include $ENV{NDDSHOME}/include/ndds src/rti_dds)
 link_directories($ENV{NDDSHOME}/lib/$ENV{TARGET_ARCH} src/rti_dds)
 add_definitions(-DRTI_UNIX -DRTI_LINUX)

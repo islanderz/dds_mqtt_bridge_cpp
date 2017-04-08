@@ -83,10 +83,14 @@ void RosReceiver::sink(char* buffer, int len, int msgId,
     time_spent += diff.toSec();
     frame_num++;
 
-    if (tt > 1.0) {
+    if (frame_num >= 30) {
+
+		int offset = 0;
+		nodeHandle.getParam("/offset", offset);
+
         cerr << "Image frame rate, avg. delay: " << frame_num <<
             ", " << std::fixed << time_spent / frame_num << endl;
-    	log_file_ros_image_recv << std::fixed << frame_num << " " << std::endl;
+    	log_file_ros_image_recv << std::fixed << ( time_spent / frame_num ) - offset << " " << std::endl;
         
         frame_num = 0;
         last_img_time = img_time;
