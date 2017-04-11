@@ -118,14 +118,15 @@ public:
             float res500 = parsePingResult(line1);
             float res20000 = parsePingResult(line2);
 
+	    std::cout << "new ping values: 500->" << res500 << " 20000->" << res20000 << std::endl;
 
             // clip between 10 and 1000.
             res500 = min(1000.0f,max(10.0f,res500));
             res20000 = min(1000.0f,max(10.0f,res20000));
 
             // update Dont smooth out here
-            // p500 = 0.7 * p500 + 0.3 * res500;
-            // p20000 = 0.7 * p20000 + 0.3 * res20000;
+            p500 = 0.7 * p500 + 0.3 * res500;
+            p20000 = 0.7 * p20000 + 0.3 * res20000;
 
             // send
             sendbuff[0] = (double)p500;
