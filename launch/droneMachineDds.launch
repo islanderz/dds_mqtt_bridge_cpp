@@ -30,5 +30,8 @@
         <param name="subscribedRosTopic_navdata" value="/ardrone/navdata"/>
 
     </node> 
+
+    <node name="ping_responder" pkg="dds_mqtt_bridge_cpp" type="ping_responder" output="screen" clear_params="true">
+    </node>
 </launch>
 
