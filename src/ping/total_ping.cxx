@@ -21,17 +21,20 @@ using namespace rti;
 class PingStats {
 private:
     boost::mutex io_mutex;
-    double values[STAT_LEN];
+
 public:
-    
+    double values[STAT_LEN];
     void write_stat(int stat_pos, double value) {
         boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
         values[stat_pos] = value;
+
+        //cerr << "POS " << stat_pos << " VAL: " << value;
     }
 
     void write_sum_stat(int target_pos, int src_pos, double value) {
         boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
         values[target_pos] = values[src_pos] + value;
+        //cerr << " SUM : " << values[target_pos] << " DDS : " << values[src_pos] << endl;
     }
 
     void get_values(double *output_values) {
@@ -45,17 +48,29 @@ class WifiPingerReceiver : public IDataSink {
 private:
     PingStats* ps;    
     DdsConnection* conn;
+
 public:
+
     // Receiver for DDS messages
     WifiPingerReceiver(PingStats* ps) : ps(ps) {
         conn = new DdsConnection(this, 200, "wifi-ping-stats", 128);
     }
+
+    //Destructor
+    ~WifiPingerReceiver()
+    {
+    	//log_file_dds_ping.close();
+    }
+
+
     // Writing the WiFi ping values.
     virtual void sink(char* data, int len, int msgId, bool isLast) {
         double* data2 = (double*)data;
-        cerr << " WIFI RTT: " << data2[0] << " - " <<  data2[1] << endl;
+
         ps->write_sum_stat(WIFI_500, DDS_500, data2[0]);
         ps->write_sum_stat(WIFI_2K, DDS_2K, data2[1]);
+        //cerr << "LOGGED " << ps->values[DDS_500] << " " << ps->values[WIFI_500] << " " << ps->values[DDS_2K] << " "<< ps->values[WIFI_2K] << endl;
+        //log_file_dds_ping << ps->values[DDS_500] << " " << ps->values[WIFI_500] << " " << ps->values[DDS_2K] << " "<< ps->values[WIFI_2K] << endl;
     }
 };
 
@@ -159,20 +174,14 @@ public:
 int main(int argc, char **argv) {
     ros::init(argc, argv, "total_ping");
     ros::NodeHandle nodeHandle;
-
-    PingStats ps;
-    std::stringstream delays;    
-    WifiPingerReceiver wpr(&ps);
-    DdsPinger dds(&ps);
     std::ofstream log_file_dds_ping;
 
-    // need to allow dds subscriptions to settle
-    sleep(1);
-    
-    dds.start();
- 	   
-    double stats[STAT_LEN];
-	std::stringstream ss;
+    PingStats ps;
+
+    WifiPingerReceiver wpr(&ps);
+    DdsPinger dds(&ps);
+
+    std::stringstream ss;
 	time_t rawtime;
 	struct tm * timeinfo;
 	char buffer[80];
@@ -184,21 +193,26 @@ int main(int argc, char **argv) {
 
 	ss << "ping_dds_wifi_" << date_time << ".txt";
 	log_file_dds_ping.open(ss.str(), std::ofstream::out | std::ofstream::app);
-    while (1) {
-        sleep(1);
-        delays.str( std::string() );
-        delays.clear();
-        ps.get_values(stats);
 
+    // need to allow dds subscriptions to settle
+    sleep(1);
+    
+    dds.start();
+ 	   
+    double stats[STAT_LEN];
+
+	while (1) {
+        sleep(1);
+//        std::ostringstream delays;
+        ps.get_values(stats);
         for (int i = 0; i < STAT_LEN; i++) {
-            cerr << fixed << stats[i] << " ";
-            delays << fixed << stats[i] << " ";
+            cerr << "LOGGED" << fixed << stats[i] << " ";
+            log_file_dds_ping << fixed << stats[i] << " ";
          }
-      cerr << endl;
-      log_file_dds_ping << fixed << delays.str() << endl;
+        cerr << endl;
+        log_file_dds_ping << endl;
     }
 
-    log_file_dds_ping.close();
-   
+	log_file_dds_ping.close();
     return 0;
 }
