@@ -5,12 +5,19 @@
 #include <boost/thread/mutex.hpp>
 #include <string>
 #include <sys/time.h>
+#include <signal.h>
 
 using namespace std;
 using namespace rti;
 
 #define WIFI_IP "192.168.1.1"
 //#define WIFI_IP "localhost"
+
+bool shutdown_total_ping = false;
+void sigint_handler(int signo) {
+    if (signo == SIGINT)
+        shutdown_total_ping = true;
+}
 
 class PingReceiver : public IDataSink {
 private:
@@ -146,7 +153,9 @@ int main(int argc, char **argv) {
     WifiPinger wp;
     wp.start();
 
-    while (1)
+    signal(SIGINT, sigint_handler);
+
+    while (!shutdown_total_ping)
         sleep(1000000);
     return 0;
 }

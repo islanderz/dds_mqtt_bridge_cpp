@@ -113,6 +113,7 @@ namespace rti {
             crashdown("Buffer1024kTypeSupport::create_data error");
         instance->payload.maximum(0);
     }
+
     DdsDataSender::~DdsDataSender() {
         try {
             shutdown();
@@ -228,6 +229,15 @@ namespace rti {
     }
     DdsConnection::~DdsConnection() {
         if (reader_listener) {
+            DDS_ReturnCode_t retcode = participant->delete_contained_entities();
+            if (retcode != DDS_RETCODE_OK) {
+                printf("delete_contained_entities error %d\n", retcode);
+            }
+            retcode = DDSTheParticipantFactory->delete_participant(participant);
+            if (retcode != DDS_RETCODE_OK) {
+                printf("delete_participant error %d\n", retcode);
+            }
+
             delete reader_listener;
             reader_listener = 0;
         }

@@ -7,6 +7,8 @@
 #include <sys/time.h>
 #include <iostream>
 #include <fstream>
+#include <signal.h>
+
 
 using namespace std;
 using namespace rti;
@@ -17,13 +19,22 @@ using namespace rti;
 #define DDS_2K      2
 #define STAT_LEN    4
 
+bool shutdown_total_ping = false;
+void sigint_handler(int signo) {
+    if (signo == SIGINT)
+        shutdown_total_ping = true;
+}
+
 
 class PingStats {
 private:
     boost::mutex io_mutex;
-
-public:
     double values[STAT_LEN];
+public:
+
+    virtual ~PingStats() {        
+    }
+
     void write_stat(int stat_pos, double value) {
         boost::unique_lock<boost::mutex> scoped_lock(io_mutex);
         values[stat_pos] = value;
@@ -56,10 +67,8 @@ public:
         conn = new DdsConnection(this, 200, "wifi-ping-stats", 128);
     }
 
-    //Destructor
-    ~WifiPingerReceiver()
-    {
-    	//log_file_dds_ping.close();
+    virtual ~WifiPingerReceiver() {
+        delete conn;
     }
 
 
@@ -84,16 +93,18 @@ private:
     timeval resp_time;
     int expected_len;
 
-    IDataSink* ping_sink500;
+    DdsDataSender* ping_sink500;
     DdsConnection* conn500;
     char* buff500;
 
-    IDataSink* ping_sink2k;
+    DdsDataSender* ping_sink2k;
     DdsConnection* conn2k;
     char* buff2k;
 
     boost::mutex ps_mutex;
     boost::condition_variable ps_cond;
+
+    bool do_shutdown;
 
     // Compute DDS Rount Trip Trime
     void ping_step(int stat_pos, char *buff, int buff_size,
@@ -106,10 +117,12 @@ private:
         sprintf(buff, "ping %d", ping_count);
         ping_sink->sink(buff, buff_size, AUTO_MSG_ID, true);
 
-        while (ping_count != ping_rec)
+        while (ping_count != ping_rec && !do_shutdown)
             ps_cond.wait(lock);
+        if (do_shutdown)
+            return;
 	
-	// Computing & Wriing DDS RTT
+        // Computing & Wriing DDS RTT
         double tt = GET_TDIFF(call_time, resp_time);
 
         ps->write_stat(stat_pos, tt*1000);
@@ -128,7 +141,8 @@ public:
         ping_count(0),
         ping_rec(0),
         buff500(new char[500]),
-        buff2k(new char[20000]) {
+        buff2k(new char[20000]),
+        do_shutdown(false) {
 
         ping_sink500 = new DdsDataSender(100, "ping-forth-500");
         conn500 = new DdsConnection(this, 100, "ping-back-500", 128);
@@ -142,12 +156,29 @@ public:
             buff2k[i] = (char)(i % 255);
     }
 
+    virtual ~DdsPinger() {
+        /* omitting for performance reasons
+        delete ping_sink2k;
+        delete conn2k;
+        delete conn500;
+        delete ping_sink500;
+
+        delete [] buff2k;
+        delete [] buff500;
+        */
+    }
+
     void start() {
         t = new boost::thread(&DdsPinger::ping_function, this);
     }
 
+    void stop() {
+        do_shutdown = true;
+        t->join();
+    }
+
     void ping_function() {
-        while (1) {
+        while (!do_shutdown) {
             ping_step(DDS_500, buff500, 500, ping_sink500);
             ping_step(DDS_2K, buff2k, 20000, ping_sink2k);
         }
@@ -201,7 +232,9 @@ int main(int argc, char **argv) {
  	   
     double stats[STAT_LEN];
 
-	while (1) {
+    signal(SIGINT, sigint_handler);
+
+	while (!shutdown_total_ping) {
         sleep(1);
 //        std::ostringstream delays;
         ps.get_values(stats);
@@ -213,6 +246,7 @@ int main(int argc, char **argv) {
         log_file_dds_ping << endl;
     }
 
+    dds.stop();
 	log_file_dds_ping.close();
     return 0;
 }
