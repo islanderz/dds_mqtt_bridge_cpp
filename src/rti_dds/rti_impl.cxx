@@ -172,8 +172,9 @@ namespace rti {
             return;
         }
 
+
         for (i = 0; i < data_seq.length(); ++i) {
-            if (info_seq[i].valid_data) {
+            if (info_seq[i].valid_data || 1) {
                 Buffer1024k* b = &data_seq[i];
                 sink->sink((char*)b->payload.get_contiguous_buffer(),
                     b->length, b->msg_id, b->is_last);

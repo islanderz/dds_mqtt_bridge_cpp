@@ -122,6 +122,10 @@ namespace rti {
         void send_curr_incomplete_buffer();
 
     public:
+        // NOTE: each connection in the same application should have
+        // different domainId (as each will have its own participant)
+        // NOTE2: domainId shall not exceed 232, otherwise there
+        // will be "invalid port" error
         DdsConnection(IDataSink* receiver, int domainId,
                       string topic_name, int buff_size);
         virtual ~DdsConnection();

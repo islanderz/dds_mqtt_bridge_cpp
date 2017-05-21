@@ -18,7 +18,6 @@
         <param name="publishedRosTopic_navdata" value="/tum_ardrone/navdata"/>
     </node>
 
-    <!--  Sends CmdVel, takeoff, reset and land messages to the DDS broker
     <node name="ddsCmdVelSender" pkg="dds_mqtt_bridge_cpp" type="ddsCmdVelSender" output="screen" clear_params="true">
 
         <param name="subscribedRosTopic_land" value="/ardrone/land"/>
@@ -26,8 +25,10 @@
         <param name="subscribedRosTopic_takeoff" value="/ardrone/takeoff"/>
         <param name="subscribedRosTopic_cmdvel" value="/cmd_vel"/>
     </node>
-     </node> -->
+
+
     <node name="total_ping" pkg="dds_mqtt_bridge_cpp" type="total_ping" output="screen" clear_params="true">
     </node>
+
 </launch>
 
