@@ -92,10 +92,10 @@ RosReceiver::RosReceiver() :
         nodeHandle.advertise<std_msgs::Empty>("/ardrone/land", 1),
         "ros-land", 201);
     receivers[zz++] = new SimpleStreamReceiver(
-        nodeHandle.advertise<std_msgs::Empty>("/ardrone/land", 1),
+        nodeHandle.advertise<std_msgs::Empty>("/ardrone/reset", 1),
         "ros-reset", 202);
     receivers[zz++] = new SimpleStreamReceiver(
-        nodeHandle.advertise<std_msgs::Empty>("/ardrone/land", 1),
+        nodeHandle.advertise<std_msgs::Empty>("/ardrone/takeoff", 1),
         "ros-takeoff", 203);
     receivers[zz++] = new CmdVelStreamReceiver(
         nodeHandle.advertise<geometry_msgs::Twist>("/cmd_vel", 1),
