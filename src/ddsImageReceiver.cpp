@@ -45,7 +45,11 @@ RosReceiver::RosReceiver() :
     gettimeofday(&last_img_time, NULL);
    
     image_transport::ImageTransport img_trans(nodeHandle);    
-    imagePub = img_trans.advertise("/tum_ardrone/image", 1);
+
+    std::string publishedRosTopic_image = "";
+    nodeHandle.getParam("/publishedRosTopic_image", publishedRosTopic_image);
+
+    imagePub = img_trans.advertise(publishedRosTopic_image, 1);
     
     std::stringstream ss;
     time_t rawtime;
@@ -100,9 +104,12 @@ void RosReceiver::sink(char* buffer, int len, int msgId,
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ddsImageReceiver");
-
+    ros::NodeHandle nodeHandle; 
     RosReceiver rr;
-    DdsConnection conn(&rr, 100, "ros-images", 1024*1024);
+    std::string subscribedTopic_image = "ros-images";
+    nodeHandle.getParam("/subscribedTopic_image", subscribedTopic_image);
+    
+    DdsConnection conn(&rr, 100, subscribedTopic_image, 1024*1024);
     return conn.loop(100000);
 }
 

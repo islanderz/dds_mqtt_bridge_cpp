@@ -41,8 +41,11 @@ RosReceiver::RosReceiver() :
 
     gettimeofday(&last_img_time, NULL);
     
+    std::string publishedRosTopic_navdata = "";
+    nodeHandle.getParam("/publishedRosTopic_navdata", publishedRosTopic_navdata);
+
     navdataPub = nodeHandle.advertise<ardrone_autonomy::Navdata>
-        ("/tum_ardrone/navdata", 1);
+        (publishedRosTopic_navdata, 1);
 
     std::stringstream ss;
     time_t rawtime;
@@ -97,9 +100,12 @@ void RosReceiver::sink(char* buffer, int len, int msgId,
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "ddsNavdataReceiver");
+    ros::NodeHandle nodeHandle; 
+    std::string subscribedTopic_navdata = "ros-navdata";
+    nodeHandle.getParam("/subscribedTopic_navdata", subscribedTopic_navdata);
 
     RosReceiver rr;
-    DdsConnection conn(&rr, 200, "ros-navdata", 1024*1024);
+    DdsConnection conn(&rr, 200, subscribedTopic_navdata, 1024*1024);
     return conn.loop(-1);
 }
 

@@ -5,22 +5,22 @@
     <param name="ddsImageDomainId" value="20"/>
     <param name="ddsNavDataDomainId" value="30"/>
     <param name="offset" value="0" />
+    <param name="subscribedTopic_image" value="ros-images"/>
+    <param name="subscribedTopic_navdata" value="ros-navdata"/>
+    <param name="publishedRosTopic_image" value="/tum_ardrone/image"/>
+    <param name="publishedRosTopic_navdata" value="/tum_ardrone/navdata"/>
 
     <node name="ddsImageReceiver" pkg="dds_mqtt_bridge_cpp" type="ddsImageReceiver" output="screen" clear_params="true">
-        <param name="loop_rate" value="30" />
-
-        <param name="publishedRosTopic_image" value="/tum_ardrone/image"/>
+        <param name="loop_rate" value="30" /> 
     </node>
 
     <node name="ddsNavdataReceiver" pkg="dds_mqtt_bridge_cpp" type="ddsNavdataReceiver" output="screen" clear_params="true">
         <param name="loop_rate" value="250" />
-
-        <param name="publishedRosTopic_navdata" value="/tum_ardrone/navdata"/>
+ 
     </node>
 
     <node name="ddsCmdVelSender" pkg="dds_mqtt_bridge_cpp" type="ddsCmdVelSender" output="screen" clear_params="true">
-
-        <param name="subscribedRosTopic_land" value="/ardrone/land"/>
+         <param name="subscribedRosTopic_land" value="/ardrone/land"/>
         <param name="subscribedRosTopic_reset" value="/ardrone/reset"/>
         <param name="subscribedRosTopic_takeoff" value="/ardrone/takeoff"/>
         <param name="subscribedRosTopic_cmdvel" value="/cmd_vel"/>
