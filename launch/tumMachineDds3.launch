@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Receives Images and Navdata from the DDS and publishes on ROS -->
+    
+    <param name="ddsImageDomainId" value="20"/>
+    <param name="ddsNavDataDomainId" value="30"/>
+    <param name="offset" value="0" />
+    <param name="subscribedTopic_image" value="ros-images3"/>
+    <param name="subscribedTopic_navdata" value="ros-navdata3"/>
+    <!--param name="subscribedTopic_image" value="ros-images3"/>
+    <param name="subscribedTopic_navdata" value="ros-navdata3"/-->
+    <param name="publishedRosTopic_image" value="/tum_ardrone/image3"/>
+    <param name="publishedRosTopic_navdata" value="/tum_ardrone/navdata3"/>
+
+
+    <node name="ddsImageReceiver3" pkg="dds_mqtt_bridge_cpp" type="ddsImageReceiver" output="screen" clear_params="true">
+        <param name="loop_rate" value="30" />
+    </node>
+
+    <node name="ddsNavdataReceiver3" pkg="dds_mqtt_bridge_cpp" type="ddsNavdataReceiver" output="screen" clear_params="true">
+        <param name="loop_rate" value="250" />
+    </node>
+
+    <node name="ddsCmdVelSender3" pkg="dds_mqtt_bridge_cpp" type="ddsCmdVelSender" output="screen" clear_params="true">
+
+        <param name="subscribedRosTopic_land" value="/ardrone/land"/>
+        <param name="subscribedRosTopic_reset" value="/ardrone/reset"/>
+        <param name="subscribedRosTopic_takeoff" value="/ardrone/takeoff"/>
+        <param name="subscribedRosTopic_cmdvel" value="/cmd_vel"/>
+    </node>
+
+
+    <!--node name="total_ping" pkg="dds_mqtt_bridge_cpp" type="total_ping" output="screen" clear_params="true">
+    </node-->
+
+</launch>
+
